@@ -8,7 +8,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     const [pin, setPin] = useState('');
     const [error, setError] = useState(false);
 
-    // HÄR SÄTTER DU DIN PIN-KOD (t.ex. 1234)
+    //PIN-KOD 
     const SECRET_PIN = "1234"; 
 
     const handleNumberClick = (num: string) => {
@@ -29,7 +29,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         } else {
             setError(true);
             setPin('');
-            // Skaka-effekt eller rött ljus kan läggas till här
+            // Skaka-effekt eller rött ljus 
         }
     };
 

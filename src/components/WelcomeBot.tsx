@@ -2,7 +2,7 @@ import React from 'react';
 import Lottie from "lottie-react";
 
 // VIKTIGT: Importera din json-fil här.
-// Se till att sökvägen stämmer till var du lade filen.
+
 import robotAnimation from '../assets/AI Robot.json';
 
 const WelcomeBot: React.FC = () => {
@@ -31,8 +31,7 @@ const WelcomeBot: React.FC = () => {
   );
 };
 
-// Vi lägger in lite enkel CSS direkt här (inline styles) för att testa snabbt.
-// Du kan flytta detta till din .scss-fil senare om du vill.
+// Stilobjekt för inline-styling
 const styles = {
     container: {
         display: 'flex',
@@ -46,7 +45,7 @@ const styles = {
         marginBottom: '20px',
     },
     robotWrapper: {
-        width: '180px', // ÄNDRA HÄR för att göra roboten större/mindre
+        width: '180px', 
         height: '180px',
     },
     welcomeText: {
@@ -56,12 +55,12 @@ const styles = {
         letterSpacing: '2px',
         marginTop: '15px',
         marginBottom: '5px',
-    },
+    }, // Stil för välkomst-texten
     subText: {
         color: '#8899A6',
         fontSize: '0.9rem',
         fontFamily: '"Courier New", Courier, monospace',
-    }
+    } // Stil för undertexten
 };
 
-export default WelcomeBot;
+export default WelcomeBot; // Exporterar komponenten så den kan användas i andra delar av appen

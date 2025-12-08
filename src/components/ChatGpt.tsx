@@ -32,18 +32,18 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
                 setResponseMessages(parsed);
             }
         } else {
-            // Om Gäst: Börja tomt (eller rensa om man vill vara säker)
+            // Om Gäst: Börja tomt 
             setResponseMessages([]);
         }
     }, [userType]);
 
-    // Spara chatten varje gång den ändras (BARA FÖR ADMIN)
+    // Spara chatten varje gång den ändras om Admin
     useEffect(() => {
         if (userType === 'admin' && responseMessages.length > 0) {
             localStorage.setItem('scifi_admin_chat', JSON.stringify(responseMessages));
         }
     }, [responseMessages, userType]);
-    // ----------------------------------------
+    // --- OPENAI CHAT LOGIK ---
 
     const openai = new OpenAI({
         apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -61,7 +61,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         setTimeout(() => setNerveTrigger(false), 1000); 
 
         const newUserMsg = { message: currentInput, user: 'user', timestamp: new Date() };
-        // Uppdatera state (vilket triggar spara-effekten ovan om admin)
+        // Uppdatera state ( triggar spara-effekten ovan om admin)
         setResponseMessages(prev => [newUserMsg, ...prev]); 
 
         setLoading(true);
@@ -109,7 +109,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         }
     }, [loading]);
 
-    // Rensa historik-funktion (bra för admin att ha)
+    // Rensa historik-funktion 
     const clearHistory = () => {
         setResponseMessages([]);
         if(userType === 'admin') localStorage.removeItem('scifi_admin_chat');
@@ -118,7 +118,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
     return (
         <div className="scifi-container">
             
-            {/* LOGOUT / HEADER INFO */}
+            {/* LOGOUT */}
             <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 100, display: 'flex', gap: '10px' }}>
                 <div style={{color: '#00f0ff', border: '1px solid #00f0ff', padding: '5px 10px', fontSize: '0.8rem'}}>
                     USER: {userType?.toUpperCase()}
