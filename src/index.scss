@@ -2,19 +2,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
 
 body {
-    background-color: #050505 !important; /* Deep dark black */
-    color: #00f0ff; /* Cyber Cyan */
+    background-color: #050505 !important;
+    color: #00f0ff;
     font-family: 'Fira Code', monospace;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Förhindra scroll på hela sidan */
+    overflow: hidden;
 }
 
-/* Huvudlayout för ChatGpt */
+/* ---------------------------------------------------- */
+/* CHAT UI STYLES                      */
+/* ---------------------------------------------------- */
+
 .scifi-container {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,34 +25,38 @@ body {
     background: radial-gradient(circle at center, #0a1520 0%, #000000 100%);
 }
 
-/* Robotens placering */
 .robot-wrapper {
     width: 350px;
     height: 350px;
     z-index: 10;
     transition: filter 0.3s ease;
-    /* Lätt glöd runt roboten */
     filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.1));
+    margin-bottom: 100px; 
 }
 
 .robot-talking {
-    /* När den pratar ökar vi glöden */
     filter: drop-shadow(0 0 35px rgba(0, 240, 255, 0.4));
 }
 
-/* Chathistorik - flytande ovanför input */
+/* Chathistorik */
 .chat-history {
     position: absolute;
     bottom: 120px;
-    width: 80%;
+    width: 100%;
     max-width: 800px;
-    max-height: 40vh;
+    max-height: 35vh;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column-reverse; /* Nyaste längst ner */
-    padding-right: 10px;
     
-    /* Scrollbar styling */
+    display: flex;
+    flex-direction: column-reverse; 
+    /* BORTTAGET: align-items: center; - Låter barnen styra sin egen position */
+    
+    left: 50%; 
+    transform: translateX(-50%);
+    
+    padding-right: 15px; /* Lite mer padding för scrollbar */
+    padding-left: 15px;
+
     &::-webkit-scrollbar {
       width: 5px;
     }
@@ -59,100 +66,256 @@ body {
     }
 }
 
-/* Meddelandebubblor i Sci-fi stil */
 .scifi-msg {
     margin-bottom: 15px;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border-radius: 4px;
     font-size: 0.9rem;
     line-height: 1.4;
     animation: fadeIn 0.5s ease-out;
-    border-left: 3px solid transparent;
-
+    
+    /* BORTTAGET: text-align: center; */
+    text-align: left; /* Standard läsriktning */
+    
+    width: fit-content; 
+    max-width: 80%;
+    
     &.user {
+        /* NYTT: Placera till höger */
         align-self: flex-end;
+        
         background: rgba(0, 240, 255, 0.05);
-        border-left: 3px solid #00f0ff;
-        text-align: right;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-bottom: 3px solid #00f0ff;
         color: #e0f7ff;
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        border-bottom-right-radius: 0; /* Hårdare hörn nere till höger */
     }
 
     &.ai {
+        /* NYTT: Placera till vänster */
         align-self: flex-start;
+        
         background: rgba(255, 255, 255, 0.03);
-        border-left: 3px solid #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-top: 3px solid #ffffff;
         color: #aaddff;
+        border-top-left-radius: 0; /* Hårdare hörn uppe till vänster */
     }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* Input-området (Terminalen) */
 .input-area {
     position: absolute;
     bottom: 40px;
-    width: 60%;
+    width: 50%;
     min-width: 300px;
     z-index: 20;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .scifi-input {
     width: 100%;
-    background: rgba(0, 10, 20, 0.8) !important;
+    background: rgba(0, 10, 20, 0.9) !important;
     border: 1px solid #003344 !important;
-    border-bottom: 2px solid #00f0ff !important;
+    border-radius: 8px;
     color: #00f0ff !important;
     padding: 15px;
+    
+    /* ÄNDRAT: Tillbaka till vänsterställd text */
+    text-align: left; 
+    
     font-family: 'Fira Code', monospace;
-    font-size: 1rem;
+    font-size: 1.1rem;
     outline: none;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
     transition: all 0.3s ease;
 
+    &::placeholder {
+        color: rgba(0, 240, 255, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
     &:focus {
-        box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
-        background: rgba(0, 15, 30, 0.9) !important;
+        box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+        border-color: #00f0ff !important;
+        transform: scale(1.02);
     }
 }
 
-/* NERV-ANIMATIONEN */
-/* Denna klass läggs på en div när vi skickar */
+/* Nerv-signalen */
 .nerve-signal {
     position: absolute;
-    bottom: 80px; /* Startar vid input */
+    bottom: 90px;
     left: 50%;
-    width: 4px;
-    height: 20px;
+    width: 2px;
+    height: 0px;
     background: #ffffff;
-    box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
-    border-radius: 5px;
+    box-shadow: 0 0 15px #00f0ff, 0 0 30px #00f0ff;
     opacity: 0;
     transform: translateX(-50%);
     pointer-events: none;
+    z-index: 5;
 }
 
 .nerve-active {
-    animation: sendSignal 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: sendSignal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes sendSignal {
     0% {
-        bottom: 80px;
+        bottom: 90px;
+        height: 10px;
         opacity: 1;
-        height: 20px;
-        width: 4px;
     }
     50% {
-        height: 60px; /* Sträcks ut när den färdas */
-        width: 2px;
+        height: 100px;
+        opacity: 0.8;
     }
     100% {
-        bottom: 50%; /* Slutar i mitten av skärmen (hos roboten) */
+        bottom: 50%;
+        height: 0px;
         opacity: 0;
-        height: 10px;
-        width: 0px;
     }
+}
+
+/* ---------------------------------------------------- */
+/* LOGIN SCREEN STYLES                 */
+/* ---------------------------------------------------- */
+
+.login-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #050a10 0%, #000000 100%);
+    z-index: 999;
+}
+
+.login-box {
+    background: rgba(0, 10, 20, 0.9);
+    border: 1px solid #00f0ff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+    text-align: center;
+    width: 300px;
+    
+    h2 {
+        color: #00f0ff;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+        padding-bottom: 10px;
+    }
+}
+
+.pin-display {
+    background: black;
+    color: #00f0ff;
+    font-size: 2rem;
+    letter-spacing: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #003344;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+
+    &.error {
+        border-color: red;
+        color: red;
+        animation: shake 0.3s;
+    }
+}
+
+.access-denied {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
+    animation: blink 0.5s infinite;
+}
+
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+
+    button {
+        background: transparent;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        color: #00f0ff;
+        padding: 15px 0;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Fira Code', monospace;
+
+        &:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        &.func-btn {
+            font-size: 0.9rem;
+            color: #aaa;
+            border-color: #555;
+        }
+
+        &.enter {
+            color: #00ff00;
+            border-color: #00ff00;
+        }
+    }
+}
+
+.divider {
+    color: #555;
+    margin: 15px 0;
+    font-size: 0.8rem;
+}
+
+.guest-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #aaa;
+    color: #aaa;
+    padding: 10px;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: #fff;
+        color: #fff;
+    }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }

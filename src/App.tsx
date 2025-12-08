@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChatGpt } from './components/ChatGpt';
+import { LoginScreen } from './components/LoginScreen';
 
 const App: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState<'admin' | 'guest' | null>(null);
+
+  const handleLogin = (type: 'admin' | 'guest') => {
+    setUserType(type);
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserType(null);
+  };
+
   return (
-    // Vi använder reset-stilar här för att garantera att den tar hela skärmen utan marginaler
     <div style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden' }}>
-      <ChatGpt />
+      {!isLoggedIn ? (
+        <LoginScreen onLogin={handleLogin} />
+      ) : (
+        <ChatGpt userType={userType} onLogout={handleLogout} />
+      )}
     </div>
   );
 };

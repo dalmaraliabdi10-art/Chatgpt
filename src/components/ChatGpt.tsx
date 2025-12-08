@@ -4,16 +4,47 @@ import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import robotAnimation from '../assets/AI Robot.json';
 import { ResponseMessageProps } from '../models/ResponseMessageProps';
 
-export const ChatGpt: React.FC = () => {
+// Lägg till props interface
+interface ChatGptProps {
+    userType: 'admin' | 'guest' | null;
+    onLogout: () => void;
+}
+
+export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
     const [inputMessage, setInputMessage] = useState<string>('');
     const [responseMessages, setResponseMessages] = useState<Array<ResponseMessageProps>>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [nerveTrigger, setNerveTrigger] = useState<boolean>(false);
     
-    // Referens till Lottie-spelaren för att kunna styra hastighet/paus
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-    // Initiera OpenAI
+    // --- LOGIK FÖR ATT SPARA/HÄMTA CHATT ---
+    useEffect(() => {
+        if (userType === 'admin') {
+            // Om Admin: Hämta sparad historik
+            const savedChat = localStorage.getItem('scifi_admin_chat');
+            if (savedChat) {
+                // Vi måste konvertera datum-strängar tillbaka till Date-objekt
+                const parsed = JSON.parse(savedChat).map((msg: any) => ({
+                    ...msg,
+                    timestamp: new Date(msg.timestamp)
+                }));
+                setResponseMessages(parsed);
+            }
+        } else {
+            // Om Gäst: Börja tomt (eller rensa om man vill vara säker)
+            setResponseMessages([]);
+        }
+    }, [userType]);
+
+    // Spara chatten varje gång den ändras (BARA FÖR ADMIN)
+    useEffect(() => {
+        if (userType === 'admin' && responseMessages.length > 0) {
+            localStorage.setItem('scifi_admin_chat', JSON.stringify(responseMessages));
+        }
+    }, [responseMessages, userType]);
+    // ----------------------------------------
+
     const openai = new OpenAI({
         apiKey: import.meta.env.VITE_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true,
@@ -24,20 +55,18 @@ export const ChatGpt: React.FC = () => {
         if (!inputMessage) return;
 
         const currentInput = inputMessage;
-        setInputMessage(''); // Rensa direkt
+        setInputMessage(''); 
 
-        // 1. Trigga nerv-animationen
         setNerveTrigger(true);
-        setTimeout(() => setNerveTrigger(false), 1000); // Återställ efter 1s (animationens tid)
+        setTimeout(() => setNerveTrigger(false), 1000); 
 
-        // Lägg till användarens meddelande i listan
         const newUserMsg = { message: currentInput, user: 'user', timestamp: new Date() };
-        setResponseMessages(prev => [newUserMsg, ...prev]); // Lägg nya överst för flex-reverse layout
+        // Uppdatera state (vilket triggar spara-effekten ovan om admin)
+        setResponseMessages(prev => [newUserMsg, ...prev]); 
 
         setLoading(true);
 
         try {
-            // Anropa OpenAI
             const stream = await openai.chat.completions.create({
                 messages: [
                     { role: 'system', content: 'You are Jarvis, a helpful AI assistant.' },
@@ -48,8 +77,6 @@ export const ChatGpt: React.FC = () => {
             });
 
             let aiResponseText = "";
-            
-            // Skapa ett placeholder-meddelande för AI
             const aiMsgId = Date.now();
             setResponseMessages(prev => [{ message: "Processing...", user: 'chatgpt', timestamp: new Date(), id: aiMsgId }, ...prev]);
 
@@ -57,7 +84,6 @@ export const ChatGpt: React.FC = () => {
                 const content = chunk.choices[0]?.delta?.content || '';
                 aiResponseText += content;
                 
-                // Uppdatera det senaste meddelandet i realtid
                 setResponseMessages(prev => {
                     const newList = [...prev];
                     newList[0] = { ...newList[0], message: aiResponseText };
@@ -73,21 +99,40 @@ export const ChatGpt: React.FC = () => {
         }
     };
 
-    // Styr roboten baserat på loading-status
     useEffect(() => {
         if (lottieRef.current) {
             if (loading) {
-                lottieRef.current.setSpeed(1.5); // Pratar/Tänker snabbt
+                lottieRef.current.setSpeed(1.5); 
             } else {
-                lottieRef.current.setSpeed(0.5); // Idle / Andas långsamt
+                lottieRef.current.setSpeed(0.5); 
             }
         }
     }, [loading]);
 
+    // Rensa historik-funktion (bra för admin att ha)
+    const clearHistory = () => {
+        setResponseMessages([]);
+        if(userType === 'admin') localStorage.removeItem('scifi_admin_chat');
+    }
+
     return (
         <div className="scifi-container">
             
-            {/* --- 1. ROBOT (CENTER) --- */}
+            {/* LOGOUT / HEADER INFO */}
+            <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 100, display: 'flex', gap: '10px' }}>
+                <div style={{color: '#00f0ff', border: '1px solid #00f0ff', padding: '5px 10px', fontSize: '0.8rem'}}>
+                    USER: {userType?.toUpperCase()}
+                </div>
+                {userType === 'admin' && (
+                    <button onClick={clearHistory} style={{background: 'transparent', color: 'red', border: '1px solid red', cursor: 'pointer'}}>
+                        PURGE MEMORY
+                    </button>
+                )}
+                <button onClick={onLogout} style={{background: '#00f0ff', border: 'none', cursor: 'pointer', padding: '5px 10px', fontWeight: 'bold'}}>
+                    LOGOUT
+                </button>
+            </div>
+
             <div className={`robot-wrapper ${loading ? 'robot-talking' : ''}`}>
                 <Lottie 
                     lottieRef={lottieRef}
@@ -97,12 +142,9 @@ export const ChatGpt: React.FC = () => {
                 />
             </div>
 
-            {/* --- 2. NERV-SIGNAL (Animeras vid skick) --- */}
             <div className={`nerve-signal ${nerveTrigger ? 'nerve-active' : ''}`}></div>
 
-            {/* --- 3. CHAT HISTORIK (Flytande bakom/över) --- */}
             <div className="chat-history">
-                {/* Vi mappar igenom listan. Eftersom vi använder flex-col-reverse i CSS kommer första elementet hamna längst ner */}
                 {responseMessages.map((msg, index) => (
                     <div key={index} className={`scifi-msg ${msg.user === 'user' ? 'user' : 'ai'}`}>
                         <strong>{msg.user === 'user' ? 'COMMAND > ' : 'SYSTEM: '}</strong>
@@ -111,7 +153,6 @@ export const ChatGpt: React.FC = () => {
                 ))}
             </div>
 
-            {/* --- 4. INPUT TERMINAL --- */}
             <form onSubmit={getOpenAIResponse} className="input-area">
                 <input
                     type="text"
