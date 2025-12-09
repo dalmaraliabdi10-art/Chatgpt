@@ -17,7 +17,7 @@ const ResponseMessage = ({ message, user, timestamp }: ResponseMessageProps) => 
         };
     }, [timestamp]);
 
-    const getTimestamp = (date: Date) => {
+    const getTimestamp = (date: Date) => { // Funktion för att formatera tidsskillnad
         const elapsed = new Date().getTime() - date.getTime();
         const seconds = Math.floor(elapsed / 1000);
 
@@ -45,9 +45,9 @@ const ResponseMessage = ({ message, user, timestamp }: ResponseMessageProps) => 
         return Math.floor(seconds) + " sekunder sedan";
     }
 
-    const [timeAgo, setTimeAgo] = useState(timestamp ? getTimestamp(timestamp) : '');
+    const [timeAgo, setTimeAgo] = useState(timestamp ? getTimestamp(timestamp) : ''); // State för att lagra den formaterade tidsskillnaden
 
-    return (
+    return ( 
         <>
             <div className="card mb-3" >
                 <div className="row g-0">
@@ -72,6 +72,6 @@ const ResponseMessage = ({ message, user, timestamp }: ResponseMessageProps) => 
             </div>
 
         </>
-    );
+    ); // JSX returnerar meddelandet med användarens avatar och tidsskillnad
 }
-export default ResponseMessage;
+export default ResponseMessage; // Exporterar komponenten så den kan användas i andra delar av appen

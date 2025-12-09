@@ -1,118 +1,168 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import OpenAI from 'openai';
-import texting from '../assets/icons8-chat.gif';
-import ResponseMessage from './ResponseMessage';
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import robotAnimation from '../assets/AI Robot.json';
 import { ResponseMessageProps } from '../models/ResponseMessageProps';
 
-export const ChatGpt: React.FC = () => {
-    const [inputMessage, setInputMessage] = React.useState<string>('');
-    const [responseMessages, setResponseMessages] = React.useState<Array<ResponseMessageProps>>([]);
-    const [responseMessage, setResponseMessage] = React.useState<ResponseMessageProps>({});
+// Lägg till props interface
+interface ChatGptProps {
+    userType: 'admin' | 'guest' | null;
+    onLogout: () => void;
+}
 
-    const [loading, setLoading] = React.useState<boolean>(false);
+export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
+    const [inputMessage, setInputMessage] = useState<string>('');
+    const [responseMessages, setResponseMessages] = useState<Array<ResponseMessageProps>>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [nerveTrigger, setNerveTrigger] = useState<boolean>(false);
+    
+    const lottieRef = useRef<LottieRefCurrentProps>(null);
+
+    // --- LOGIK FÖR ATT SPARA/HÄMTA CHATT ---
+    useEffect(() => {
+        if (userType === 'admin') {
+            // Om Admin: Hämta sparad historik
+            const savedChat = localStorage.getItem('scifi_admin_chat');
+            if (savedChat) {
+                // Vi måste konvertera datum-strängar tillbaka till Date-objekt
+                const parsed = JSON.parse(savedChat).map((msg: any) => ({
+                    ...msg,
+                    timestamp: new Date(msg.timestamp)
+                }));
+                setResponseMessages(parsed);
+            }
+        } else {
+            // Om Gäst: Börja tomt 
+            setResponseMessages([]);
+        }
+    }, [userType]);
+
+    // Spara chatten varje gång den ändras om Admin
+    useEffect(() => {
+        if (userType === 'admin' && responseMessages.length > 0) {
+            localStorage.setItem('scifi_admin_chat', JSON.stringify(responseMessages));
+        }
+    }, [responseMessages, userType]);
+    // --- OPENAI CHAT LOGIK ---
 
     const openai = new OpenAI({
         apiKey: import.meta.env.VITE_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true,
     });
 
-    const getOpenAIResponse = async (e: React.FormEvent<EventTarget>) => {
+    const getOpenAIResponse = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!inputMessage) return;
 
-        // If responseMessage is not empty, add it to responseMessages
-        if (responseMessage?.message && responseMessage.message.length > 0) {
-            setResponseMessages(prevMessages => [
-                ...prevMessages,
-                responseMessage
-            ]);
-        }
-        setResponseMessage({});
+        const currentInput = inputMessage;
+        setInputMessage(''); 
 
-        // Add inputmessage to responseMessages
-        setResponseMessages(prevMessages => [
-            ...prevMessages,
-            { message: inputMessage, user: 'user', timestamp: new Date() }
-        ]);
+        setNerveTrigger(true);
+        setTimeout(() => setNerveTrigger(false), 1000); 
 
-        
-        // Start openAI chat
-        const stream = await openai.chat.completions.create(
-            {
+        const newUserMsg = { message: currentInput, user: 'user', timestamp: new Date() };
+        // Uppdatera state ( triggar spara-effekten ovan om admin)
+        setResponseMessages(prev => [newUserMsg, ...prev]); 
+
+        setLoading(true);
+
+        try {
+            const stream = await openai.chat.completions.create({
                 messages: [
-                    { role: 'assistant', content: 'Du är konfigurerad som en hjälpsam assistent med namnet ReactoBot. Dina svar bör efterlikna stilen och fraserna som används av Jarvis i Iron Man-filmerna. Till exempel bör du använda fraser som "God kväll, Mäsaten" i dina interaktioner. Din huvudsakliga funktion är att svara på alla frågor och kommandon på ett sätt som är konsekvent med Jarvis karaktär från filmerna, samtidigt som du upprätthåller ett artigt, effektivt och stödjande uppförande genom hela dialogen.' },
-                    { role: 'user', content: inputMessage || '' }
+                    { role: 'system', content: 'You are Jarvis, a helpful AI assistant.' },
+                    { role: 'user', content: currentInput }
                 ],
                 model: 'gpt-4',
-                stream: true
+                stream: true,
+            });
+
+            let aiResponseText = "";
+            const aiMsgId = Date.now();
+            setResponseMessages(prev => [{ message: "Processing...", user: 'chatgpt', timestamp: new Date(), id: aiMsgId }, ...prev]);
+
+            for await (const chunk of stream) {
+                const content = chunk.choices[0]?.delta?.content || '';
+                aiResponseText += content;
+                
+                setResponseMessages(prev => {
+                    const newList = [...prev];
+                    newList[0] = { ...newList[0], message: aiResponseText };
+                    return newList;
+                });
             }
-        );
 
-        // Start a stream and get the response
-        setLoading(true);
-        setResponseMessage({ message: '', user: 'chatgpt', timestamp: new Date() });
-        for await (const chunk of stream) {
-            setResponseMessage((prevMessage) => ({
-                ...prevMessage,
-                message: (prevMessage.message || '') + (chunk.choices[0]?.delta?.content || ''),
-            }));
-
+        } catch (error) {
+            console.error(error);
+            setResponseMessages(prev => [{ message: "Error: Neural link disrupted.", user: 'chatgpt', timestamp: new Date() }, ...prev]);
+        } finally {
+            setLoading(false);
         }
-
-        setInputMessage('');
-        setLoading(false);
-
     };
 
-    const resetChat = () => {
+    useEffect(() => {
+        if (lottieRef.current) {
+            if (loading) {
+                lottieRef.current.setSpeed(1.5); 
+            } else {
+                lottieRef.current.setSpeed(0.5); 
+            }
+        }
+    }, [loading]);
+
+    // Rensa historik-funktion 
+    const clearHistory = () => {
         setResponseMessages([]);
-        setResponseMessage({});
+        if(userType === 'admin') localStorage.removeItem('scifi_admin_chat');
     }
 
     return (
-        <>
-            {responseMessages.map((response, index) => (
-                <ResponseMessage key={index} message={response.message} user={response.user} timestamp={response.timestamp} />
-            ))}
+        <div className="scifi-container">
+            
+            {/* LOGOUT */}
+            <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 100, display: 'flex', gap: '10px' }}>
+                <div style={{color: '#00f0ff', border: '1px solid #00f0ff', padding: '5px 10px', fontSize: '0.8rem'}}>
+                    USER: {userType?.toUpperCase()}
+                </div>
+                {userType === 'admin' && (
+                    <button onClick={clearHistory} style={{background: 'transparent', color: 'red', border: '1px solid red', cursor: 'pointer'}}>
+                        PURGE MEMORY
+                    </button>
+                )}
+                <button onClick={onLogout} style={{background: '#00f0ff', border: 'none', cursor: 'pointer', padding: '5px 10px', fontWeight: 'bold'}}>
+                    LOGOUT
+                </button>
+            </div>
 
-            {responseMessage?.message && responseMessage.message.length > 0 &&
-                <ResponseMessage message={responseMessage.message} user={responseMessage.user} timestamp={responseMessage.timestamp} />
-            }
-            {loading &&
-                <div className='row'>
-                    <div className='col-12'>
-                        <img src={texting} />
+            <div className={`robot-wrapper ${loading ? 'robot-talking' : ''}`}>
+                <Lottie 
+                    lottieRef={lottieRef}
+                    animationData={robotAnimation} 
+                    loop={true} 
+                    style={{ width: '100%', height: '100%' }}
+                />
+            </div>
+
+            <div className={`nerve-signal ${nerveTrigger ? 'nerve-active' : ''}`}></div>
+
+            <div className="chat-history">
+                {responseMessages.map((msg, index) => (
+                    <div key={index} className={`scifi-msg ${msg.user === 'user' ? 'user' : 'ai'}`}>
+                        <strong>{msg.user === 'user' ? 'COMMAND > ' : 'SYSTEM: '}</strong>
+                        {msg.message}
                     </div>
-                </div>
-            }
-            <form onSubmit={getOpenAIResponse} className='row' >
-                <div className='form-floating mb-3'>
-                    
-                    <textarea
-                        id="chat-input"
-                        rows={5}
-                        value={inputMessage}
-                        onChange={e => setInputMessage(e.target.value)}
-                        className='form-control form-control-lg'
-                        placeholder='Skriv något till...'
-                        required
-                    />
-                    <label className="form-label">Skriv ett meddelande här</label>
-                </div>
-                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button
-                        className='btn btn-primary btn-lg m-3'
-                        type="submit">Skicka meddelande</button>
+                ))}
+            </div>
 
-                    {responseMessages.length > 0 &&
-                        <button
-                            onClick={resetChat}
-                            className='btn btn-secondary btn-lg m-3'
-                            disabled={responseMessages.length > 0 ? false : true}
-                            type="reset">Återställ dialog</button>
-                    }
-                </div>
+            <form onSubmit={getOpenAIResponse} className="input-area">
+                <input
+                    type="text"
+                    className="scifi-input"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="ENTER COMMAND..."
+                    autoFocus
+                />
             </form>
-
-        </>
+        </div>
     );
 };
