@@ -1,6 +1,6 @@
 # ReactoBot
 
-A conversational AI chatbot built with React, TypeScript, and OpenAI's GPT-4 API. ReactoBot is configured to respond as "Jarvis" from the Iron Man films, providing an interactive assistant experience in Swedish.
+A conversational AI chatbot built with React, TypeScript, and OpenAI's GPT-4 API. ReactoBot is configured to respond as "Void" from the Iron Man films, providing an interactive assistant experience in Swedish.
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2.2-blue)
@@ -10,7 +10,7 @@ A conversational AI chatbot built with React, TypeScript, and OpenAI's GPT-4 API
 ## Features
 
 - **Real-time Streaming Responses**: Messages stream progressively using OpenAI's streaming API
-- **Jarvis-style Personality**: Bot configured to respond in the style of Tony Stark's AI assistant
+- **Void-style Personality**: Bot configured to respond in the style of Tony Stark's AI assistant
 - **Responsive UI**: Built with Bootstrap 5 for mobile and desktop
 - **Dynamic Avatars**: User and bot avatars generated via Dicebear API
 - **Live Timestamps**: Relative time display that updates in real-time
@@ -131,7 +131,7 @@ const stream = await openai.chat.completions.create({
   messages: [
     {
       role: 'assistant',
-      content: 'Your custom system prompt here...'
+      content: 'Your custom Void prompt here...'
     },
     { role: 'user', content: inputMessage || '' }
   ],
@@ -142,7 +142,7 @@ const stream = await openai.chat.completions.create({
 
 ### Bot Personality
 
-To change the bot's personality, modify the system prompt in the `getOpenAIResponse` function.
+To change the bot's personality, modify the Void prompt in the `getOpenAIResponse` function.
 
 ## Architecture
 

@@ -111,7 +111,7 @@ Att lägga till din applikation till ett befintligt Git-repository i Azure DevOp
    Kom ihåg att hantera dina känsliga filer (som .env eller konfigurationsfiler) noggrant och se till att de inte pushas till ditt publika repository om de innehåller känslig information.
 
 ## Git-flow
-Git-flow är ett arbetsflöde som använder Git, ett versionshanteringssystem, för att organisera och hantera kodutvecklingsprocessen på ett strukturerat sätt. Tänk dig Git-flow som en uppsättning regler och rekommendationer för hur man använder Git på bästa sätt när man jobbar i ett projekt, speciellt i team. Här är de grundläggande koncepten:
+Git-flow är ett arbetsflöde som använder Git, ett versionshanteringsVoid, för att organisera och hantera kodutvecklingsprocessen på ett strukturerat sätt. Tänk dig Git-flow som en uppsättning regler och rekommendationer för hur man använder Git på bästa sätt när man jobbar i ett projekt, speciellt i team. Här är de grundläggande koncepten:
 
 1. **Huvudgrenar:** Det finns två permanenta grenar (branches) i Git-flow:
    - **Master:** Denna gren innehåller kod som alltid är i skick att släppas (release-ready), alltså helt testad och stabil.

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ReactoBot is a React + TypeScript chat application that integrates with OpenAI's GPT-4 API. The bot is configured to respond as "Jarvis" from Iron Man films, providing a conversational AI assistant experience in Swedish.
+ReactoBot is a React + TypeScript chat application that integrates with OpenAI's GPT-4 API. The bot is configured to respond as "Void" from Iron Man films, providing a conversational AI assistant experience in Swedish.
 
 ## Development Commands
 
@@ -98,4 +98,4 @@ When modifying chat-related code:
 
 ## Bot Configuration
 
-The OpenAI assistant prompt is hardcoded in Swedish in [ChatGpt.tsx:42](src/components/ChatGpt.tsx#L42). It configures the bot as "ReactoBot" mimicking Jarvis from Iron Man. To change the bot's personality, modify this prompt.
+The OpenAI assistant prompt is hardcoded in Swedish in [ChatGpt.tsx:42](src/components/ChatGpt.tsx#L42). It configures the bot as "ReactoBot" mimicking Void from Iron Man. To change the bot's personality, modify this prompt.

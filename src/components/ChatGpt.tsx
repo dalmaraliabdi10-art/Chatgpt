@@ -69,7 +69,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         try {
             const stream = await openai.chat.completions.create({
                 messages: [
-                    { role: 'system', content: 'You are Jarvis, a helpful AI assistant.' },
+                    { role: 'system', content: 'You are Void, a helpful AI assistant. The name is Void.' },
                     { role: 'user', content: currentInput }
                 ],
                 model: 'gpt-4',
@@ -147,7 +147,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
             <div className="chat-history">
                 {responseMessages.map((msg, index) => (
                     <div key={index} className={`scifi-msg ${msg.user === 'user' ? 'user' : 'ai'}`}>
-                        <strong>{msg.user === 'user' ? 'COMMAND > ' : 'SYSTEM: '}</strong>
+                        <strong>{msg.user === 'user' ? 'COMMAND > ' : 'Void: '}</strong>
                         {msg.message}
                     </div>
                 ))}

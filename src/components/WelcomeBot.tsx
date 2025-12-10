@@ -26,7 +26,7 @@ const WelcomeBot: React.FC = () => {
 
        {/* Välkomst-texten */}
        <h2 style={styles.welcomeText}>Welcome.</h2>
-       <p style={styles.subText}>System online. Ready for input.</p>
+       <p style={styles.subText}>Void online. Ready for input.</p>
     </div>
   );
 };

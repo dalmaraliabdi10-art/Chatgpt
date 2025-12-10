@@ -1,4 +1,4 @@
-/* --- TEMA: JARVIS / SCI-FI CORE --- */
+/* --- TEMA: Void / SCI-FI CORE --- */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
 
 body {
@@ -49,7 +49,7 @@ body {
     
     display: flex;
     flex-direction: column-reverse; 
-    /* BORTTAGET: align-items: center; - Låter barnen styra sin egen position */
+    /*align-items: center; - Låter barnen styra sin egen position */
     
     left: 50%; 
     transform: translateX(-50%);
@@ -80,7 +80,7 @@ body {
     max-width: 80%;
     
     &.user {
-        /* NYTT: Placera till höger */
+        /* Placera till höger */
         align-self: flex-end;
         
         background: rgba(0, 240, 255, 0.05);
@@ -92,7 +92,7 @@ body {
     }
 
     &.ai {
-        /* NYTT: Placera till vänster */
+        /* Placera till vänster */
         align-self: flex-start;
         
         background: rgba(255, 255, 255, 0.03);

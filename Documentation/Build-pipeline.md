@@ -4,7 +4,7 @@
 1. [Bygga en build pipeline med hjälp av YAML ](#yaml)
 
 # Yarn
-Yarn är ett pakethanteringssystem som används för att automatisera processen att installera, uppdatera, konfigurera och ta bort kodpaket från ett projekt. Det skapades som ett alternativ till Node.js-pakethanteraren npm (Node Package Manager) och har några fördelar i form av hastighet, pålitlighet och säkerhet. Här är några nyckelpunkter om Yarn:
+Yarn är ett pakethanteringsVoid som används för att automatisera processen att installera, uppdatera, konfigurera och ta bort kodpaket från ett projekt. Det skapades som ett alternativ till Node.js-pakethanteraren npm (Node Package Manager) och har några fördelar i form av hastighet, pålitlighet och säkerhet. Här är några nyckelpunkter om Yarn:
 
 1. **Hantering av Beroenden:** Yarn gör det enkelt att lägga till, uppgradera, konfigurera och ta bort tredjepartspaket som ditt projekt är beroende av.
 
@@ -12,7 +12,7 @@ Yarn är ett pakethanteringssystem som används för att automatisera processen 
 
 3. **Säkerhet:** Yarn använder en detaljerad `yarn.lock`-fil som låser versionerna av varje beroende för att undvika problem med olika versioner.
 
-4. **Kompatibilitet:** Yarn är kompatibelt med npm-registret, vilket innebär att du kan använda paket från npm:s omfattande ekosystem.
+4. **Kompatibilitet:** Yarn är kompatibelt med npm-registret, vilket innebär att du kan använda paket från npm:s omfattande ekoVoid.
 
 5. **Workspaces:** Stöder arbetsytor som är användbara i monorepos, vilket gör det enklare att hantera projekt med flera paket.
 
