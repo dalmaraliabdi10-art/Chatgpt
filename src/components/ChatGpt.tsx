@@ -5,7 +5,6 @@ import robotAnimation from '../assets/AI Robot.json';
 import { ResponseMessageProps } from '../models/ResponseMessageProps';
 
 // --- TYP-DEFINITIONER FÖR RÖST (Web Speech API) ---
-// Detta behövs för att TypeScript inte ska klaga på 'webkitSpeechRecognition'
 declare global {
     interface Window {
         webkitSpeechRecognition: any;
@@ -23,7 +22,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
     const [responseMessages, setResponseMessages] = useState<Array<ResponseMessageProps>>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [nerveTrigger, setNerveTrigger] = useState<boolean>(false);
-    const [isListening, setIsListening] = useState<boolean>(false); // Ny state för mikrofon
+    const [isListening, setIsListening] = useState<boolean>(false); 
     
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
@@ -49,20 +48,17 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         }
     }, [responseMessages, userType]);
 
-    // --- RÖST-FUNKTIONER (NYTT) ---
+    // --- RÖST-FUNKTIONER ---
     
-    // 1. Få Void att prata (Text-to-Speech)
     const speakText = (text: string) => {
         if (!window.speechSynthesis) return;
-        // Stoppa om den redan pratar
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US'; // Sätt till 'sv-SE' om du vill att Void pratar svenska
-        utterance.pitch = 0.8;    // Lite mörkare röst för robot-känsla
-        utterance.rate = 1.1;     // Lite snabbare
+        utterance.lang = 'en-US'; 
+        utterance.pitch = 0.8;    
+        utterance.rate = 1.1;     
         
-        // Hitta en bra röst om möjligt
         const voices = window.speechSynthesis.getVoices();
         const robotVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha'));
         if (robotVoice) utterance.voice = robotVoice;
@@ -70,7 +66,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         window.speechSynthesis.speak(utterance);
     };
 
-    // 2. Lyssna på dig (Speech-to-Text)
     const startListening = () => {
         if (!('webkitSpeechRecognition' in window)) {
             alert("Din webbläsare stödjer inte röstigenkänning (testa Chrome).");
@@ -80,7 +75,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         const SpeechRecognition = window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
-        recognition.lang = 'en-US'; // Ändra till 'sv-SE' för svenska
+        recognition.lang = 'en-US'; 
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
@@ -90,9 +85,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
             const transcript = event.results[0][0].transcript;
             setInputMessage(transcript);
             setIsListening(false);
-            
-            // Valfritt: Skicka meddelandet direkt när du slutat prata:
-            // handleAutoSend(transcript); 
         };
 
         recognition.onerror = (event: any) => {
@@ -117,7 +109,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         e.preventDefault();
         if (!inputMessage) return;
 
-        // Stoppa ev. pågående tal när du skickar nytt
         window.speechSynthesis.cancel();
 
         const currentInput = inputMessage;
@@ -132,16 +123,18 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         setLoading(true);
 
         try {
+            // FIXAD KOD HÄR:
+            // "|| ''" för att hantera undefined
+            // "as any" för att tvinga TypeScript att acceptera formatet
             const conversationHistory = responseMessages.slice().reverse().map(msg => ({
-                role: (msg.user === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-                content: msg.message
-            }));
+                role: (msg.user === 'user' ? 'user' : 'assistant'),
+                content: msg.message || '' 
+            })) as any;
 
             const stream = await openai.chat.completions.create({
                 messages: [
                     { 
                         role: 'system', 
-                        // --- HÄR ÄR "INLÄRNINGEN" ---
                         content: `You are Void, an advanced personal AI assistant. 
                                   You are efficient, helpful, and intelligent.
                                   Important: Adapt to the user's speaking style and tone. 
@@ -170,7 +163,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
                 });
             }
 
-            // När hela svaret är klart - Läs upp det!
             speakText(aiResponseText);
 
         } catch (error) {
@@ -235,7 +227,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
             </div>
 
             <form onSubmit={getOpenAIResponse} className="input-area" style={{display: 'flex', gap: '10px'}}>
-                {/* --- MIKROFON KNAPP --- */}
                 <button 
                     type="button" 
                     onClick={startListening}
@@ -264,7 +255,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
                 />
             </form>
             
-            {/* Lägg till en enkel keyframe animation för inspelning om du vill i din CSS, annars funkar det ändå */}
             <style>{`
                 @keyframes pulse {
                     0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
