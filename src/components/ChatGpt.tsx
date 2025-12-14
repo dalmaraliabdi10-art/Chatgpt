@@ -60,7 +60,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         utterance.rate = 1.1;     
         
         const voices = window.speechSynthesis.getVoices();
-        // Försök hitta en bra engelsk röst, helst en "Google" eller "Samantha" (iOS standard)
         const robotVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha'));
         if (robotVoice) utterance.voice = robotVoice;
 
@@ -68,7 +67,6 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
     };
 
     const startListening = () => {
-        // Hitta rätt version av SpeechRecognition (Standard eller WebKit)
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
@@ -129,17 +127,26 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         setLoading(true);
 
         try {
-            // FIX: "as any" för att undvika byggfel
             const conversationHistory = responseMessages.slice().reverse().map(msg => ({
                 role: (msg.user === 'user' ? 'user' : 'assistant'),
                 content: msg.message || '' 
             })) as any;
 
+            // Hämta dagens datum dynamiskt
+            const today = new Date().toLocaleDateString('sv-SE', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
             const stream = await openai.chat.completions.create({
                 messages: [
                     { 
                         role: 'system', 
+                        // HÄR ÄR UPPDATERINGEN: Vi berättar för Void vad datumet är idag.
                         content: `You are Void, an advanced personal AI assistant. 
+                                  Current Date: ${today}.
                                   You are efficient, helpful, and intelligent.
                                   Important: Adapt to the user's speaking style and tone. 
                                   If the user is casual, be casual. If they are formal, be formal.
@@ -148,7 +155,8 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
                     ...conversationHistory,
                     { role: 'user', content: currentInput }
                 ],
-                model: 'gpt-4',
+                // HÄR BYTER VI TILL DEN NYASTE MODELLEN:
+                model: 'gpt-4o', 
                 stream: true,
             });
 
