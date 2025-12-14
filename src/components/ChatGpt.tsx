@@ -60,6 +60,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         utterance.rate = 1.1;     
         
         const voices = window.speechSynthesis.getVoices();
+        // Försök hitta en bra engelsk röst, helst en "Google" eller "Samantha" (iOS standard)
         const robotVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha'));
         if (robotVoice) utterance.voice = robotVoice;
 
@@ -67,12 +68,14 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
     };
 
     const startListening = () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("Din webbläsare stödjer inte röstigenkänning (testa Chrome).");
+        // Hitta rätt version av SpeechRecognition (Standard eller WebKit)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert("Röstigenkänning stöds inte i denna webbläsare. På iPhone MÅSTE du använda Safari.");
             return;
         }
 
-        const SpeechRecognition = window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
         recognition.lang = 'en-US'; 
@@ -90,6 +93,9 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         recognition.onerror = (event: any) => {
             console.error("Speech error", event.error);
             setIsListening(false);
+            if (event.error === 'not-allowed') {
+                alert("Du måste tillåta mikrofonen. Om du är på iPhone, kontrollera att du använder Safari.");
+            }
         };
 
         recognition.onend = () => {
@@ -123,9 +129,7 @@ export const ChatGpt: React.FC<ChatGptProps> = ({ userType, onLogout }) => {
         setLoading(true);
 
         try {
-            // FIXAD KOD HÄR:
-            // "|| ''" för att hantera undefined
-            // "as any" för att tvinga TypeScript att acceptera formatet
+            // FIX: "as any" för att undvika byggfel
             const conversationHistory = responseMessages.slice().reverse().map(msg => ({
                 role: (msg.user === 'user' ? 'user' : 'assistant'),
                 content: msg.message || '' 
